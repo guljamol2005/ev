@@ -4,13 +4,6 @@ from apps.keyboards.default.user import *
 
 router = Router()
 
-
-@router.message(F.text.in_(["Menu 🍴", "Menyu 🍴"]))
-async def user_menu_handler(message: types.Message):
-    text = "User menu is tapped"
-    await message.answer(text=text)
-
-
 @router.message(F.text == "/start")
 async def start_handler(message: types.Message):
     text = (
@@ -18,6 +11,10 @@ async def start_handler(message: types.Message):
         f"{message.from_user.mention_html(f'{message.from_user.full_name}')}!"
     )
     await message.answer(text=text, reply_markup=user_main_menu_keyboard)
+
+@router.message(F.text.in_(["Menu 🍴", "Menyu 🍴"]))
+async def user_menu_handler(message: types.Message):
+    await message.answer(text="User menu is tapped", reply_markup=user_menu_keyboard)
 
 
 @router.message(F.text == "Setlar 🍱")

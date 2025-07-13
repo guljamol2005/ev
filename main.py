@@ -65,6 +65,7 @@ async def main():
     dp.include_router(register.router)
     dp.include_router(feedback.router)
     dp.include_router(user_menu.router)
+    dp.include_router(start_handler.ro)
 
     # ── Global middlewares
     dp.message.middleware.register(DbSessionMiddleware())

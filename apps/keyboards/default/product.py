@@ -35,3 +35,7 @@ async def admin_product_keyboard(session: AsyncSession, chat_id: int):
         keyboard=keyboard,
         resize_keyboard=True
     )
+
+
+
+

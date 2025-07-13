@@ -1,9 +1,30 @@
 import os
+import asyncio
+import logging
 import polib
+from aiogram import Bot
 
+from loader import bot, dp, i18n
 
+# Middlewares
+from apps.middlewares.db_session import DbSessionMiddleware
+from apps.middlewares.language import LanguageMiddleware
+from aiogram import types, Router
+from aiogram.filters import Command
+from apps.keyboards.default.user import user_main_menu_keyboard
+
+# Routers
+from apps.routers import start, register, feedback, backs, user_menu
+from apps.routers.admin import category, product
+
+# Utils & config
+from apps.utils.commands import set_my_commands
+from core.config import DEVELOPER
+
+# ────────────────────────
+# .po → .mo kompilyatsiya
+# ────────────────────────
 def compile_translations():
-    """Compile .po files to .mo for all available locales."""
     locales = ["en", "ru", "uz"]
     for loc in locales:
         po_path = f"locale/{loc}/LC_MESSAGES/lang.po"
@@ -17,26 +38,9 @@ def compile_translations():
 
 compile_translations()
 
-import asyncio
-import logging
-from aiogram import Bot
-
-# Middlewares
-from apps.middlewares.db_session import DbSessionMiddleware
-from apps.middlewares.language import LanguageMiddleware
-
-# Routers
-from apps.routers import start, register, feedback, backs, user_menu
-from apps.routers.admin import category, product
-
-# Utils & config
-from apps.utils.commands import set_my_commands
-from core.config import DEVELOPER
-from loader import bot, dp, i18n
-
-# ────────────────────────────
-# Web‑hook (disabled for now)
-# ────────────────────────────
+# ────────────────────────
+# Web‑hook parametrlari (hozir ishlatilmayapti)
+# ────────────────────────
 WEB_SERVER_HOST = "127.0.0.1"
 WEB_SERVER_PORT = 8080
 WEBHOOK_PATH = "/webhook"
@@ -44,39 +48,36 @@ WEBHOOK_SECRET = "SECRET"
 
 
 async def startup(bot: Bot):
-    """Actions to perform on bot startup."""
     await set_my_commands(bot)
-    await bot.send_message(text="Bot start to work", chat_id=DEVELOPER)
+    await bot.send_message(chat_id=DEVELOPER, text="Bot start to work")
 
 
 async def shutdown(bot: Bot):
-    """Actions to perform on bot shutdown."""
-    await bot.send_message(text="Bot stopped", chat_id=DEVELOPER)
+    await bot.send_message(chat_id=DEVELOPER, text="Bot stopped")
 
 
 async def main():
-    # ── Admin routers
+    # ── Admin routerlar
     dp.include_router(backs.router)
     dp.include_router(category.router)
     dp.include_router(product.router)
 
-    # ── User routers
+    # ── User routerlar
     dp.include_router(start.router)
     dp.include_router(register.router)
     dp.include_router(feedback.router)
     dp.include_router(user_menu.router)
-    dp.include_router(start_handler.ro)
 
     # ── Global middlewares
     dp.message.middleware.register(DbSessionMiddleware())
     dp.callback_query.middleware.register(DbSessionMiddleware())
     dp.message.middleware.register(LanguageMiddleware(i18n=i18n))
 
-    # ── Lifecycle handlers
+    # ── Lifecycle handlerlar
     dp.startup.register(startup)
     dp.shutdown.register(shutdown)
 
-    # ── Start polling (web‑hook commented out)
+    # ── Polling
     await dp.start_polling(bot, polling_timeout=0)
 
 

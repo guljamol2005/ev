@@ -14,3 +14,4 @@ I18N_DOMAIN = "lang"
 LOCALES_DIR = "locale"
 
 i18n = I18n(path=LOCALES_DIR, default_locale="en", domain=I18N_DOMAIN)
+_ = i18n.gettext
